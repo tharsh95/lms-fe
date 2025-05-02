@@ -49,6 +49,22 @@ export interface AuthResponse {
     token: string;
   };
 }
+export interface StudentResponse {
+  success?: boolean;
+  data: {
+    _id: string
+    email: string
+    name: string
+    classes: {
+      classId: string
+      name: string
+      description: string
+      grade: string
+      section: string
+      academicYear: string
+    };
+  };
+}
 
 // Private state
 let currentUser: User | null = null;
@@ -58,7 +74,7 @@ let authToken: string | null = null;
 const initializeAuth = (): void => {
   const storedToken = localStorage.getItem('auth_token');
   const storedUser = localStorage.getItem('auth_user');
-  
+
   if (storedToken && storedUser) {
     authToken = storedToken;
     currentUser = JSON.parse(storedUser);
@@ -71,15 +87,15 @@ export const authApi = {
   login: async (credentials: LoginData): Promise<User> => {
     try {
       const response = await api.post<AuthResponse>('/auth/login', credentials);
-      
+
       if (response.data.success && response.data.data.token) {
         authToken = response.data.data.token;
         currentUser = response.data.data.user;
-        
+
         // Store token and user in localStorage
         localStorage.setItem('auth_token', response.data.data.token);
         localStorage.setItem('auth_user', JSON.stringify(response.data.data.user));
-        
+
         return currentUser;
       } else {
         throw new Error('Login failed: Invalid response format');
@@ -95,7 +111,7 @@ export const authApi = {
     try {
       const token = localStorage.getItem('auth_token');
       if (!token) return false;
-      
+
       // Make a request to validate the token
       const response = await api.get('/auth/protected');
       return response.data.success === true;
@@ -109,15 +125,15 @@ export const authApi = {
   register: async (data: RegisterData): Promise<User> => {
     try {
       const response = await api.post<AuthResponse>('/auth/register', data);
-      
+
       if (response.data.success && response.data.data.token) {
         authToken = response.data.data.token;
         currentUser = response.data.data.user;
-        
+
         // Store token and user in localStorage
         localStorage.setItem('auth_token', response.data.data.token);
         localStorage.setItem('auth_user', JSON.stringify(response.data.data.user));
-        
+
         return currentUser;
       } else {
         throw new Error('Registration failed: Invalid response format');
@@ -149,6 +165,19 @@ export const authApi = {
   // Get auth token
   getToken: (): string | null => {
     return authToken;
+  },
+  addStudent: async (data: { name: string; email: string; classId: string }) => {
+    await api.post('/auth/add-student', data);
+  },
+  addTeacher: async (data: { name: string; email: string; classId: string }) => {
+    await api.post('/auth/add-teacher', data);
+  },
+  getStudents: async () => {
+    const { data } = await api.get<StudentResponse>('/auth/students');
+    return data
+  },
+  addClass: async (data: { name: string; description: string; subject: string; grade: string; section: string; academicYear: string }) => {
+    await api.post('/classes', data);
   }
 };
 

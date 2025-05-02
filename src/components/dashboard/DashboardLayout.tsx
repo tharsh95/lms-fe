@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import {Link, useLocation, Outlet} from "react-router-dom"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -86,7 +84,7 @@ export default function DashboardLayout() {
         )}
         asChild
       >
-        <Link to="/dashboard/classroom">
+        <Link to="/dashboard/classroompage">
           <Users className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")} />
           {!isSidebarCollapsed && <span>Classroom</span>}
         </Link>

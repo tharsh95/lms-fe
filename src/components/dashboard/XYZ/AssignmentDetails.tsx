@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -26,7 +24,7 @@ import { jsPDF } from "jspdf";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { ASSIGNMENT_TYPES } from "@/utils/constants";
-import { Assignment } from "@/context/AssignmentContext";
+import { Assignment, Question } from "@/context/AssignmentContext";
 
 interface Answer {
   questionId: string;
@@ -51,7 +49,7 @@ export default function AssignmentDetails() {
   }, [fetchAssignment]);
 
   const totalPoints = data?.questions?.reduce(
-    (acc: number, question: { points: number }) => acc + question.points,
+    (acc: number, question: Question) => acc + (question.points || 0),
     0
   );
   // Mock data for the assignment
@@ -135,14 +133,17 @@ export default function AssignmentDetails() {
   };
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             {assignment.title}
           </h1>
           <p className="text-muted-foreground">
-            Due: {new Date(assignment.dueDate).toLocaleDateString()}
+            Due:{" "}
+            {assignment.dueDate
+              ? new Date(assignment.dueDate).toLocaleDateString()
+              : "No due date"}
           </p>
         </div>
         <div className="flex gap-2">

@@ -12,7 +12,7 @@ export const ASSIGNMENT_TYPE_INFO = {
     [ASSIGNMENT_TYPES.ESSAY]: {
       title: "Essay",
       description: "A written composition on a particular subject",
-      outputs: ["instructions", "rubric"],
+      outputs: ["questions", "instructions", "rubric",],
     },
 
     [ASSIGNMENT_TYPES.MULTIPLE_CHOICE]: {
@@ -23,7 +23,7 @@ export const ASSIGNMENT_TYPE_INFO = {
     [ASSIGNMENT_TYPES.SHORT_ANSWER]: {
       title: "Short Answer Test",
       description: "Questions requiring brief written responses",
-      outputs: ["questions", "answer_key", "rubric"],
+      outputs: ["questions","answer_key"]
     },
 
   

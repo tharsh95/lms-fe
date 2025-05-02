@@ -3,17 +3,23 @@ import Login from './components/auth/Login';
 import Register from './components/auth/Register';
 import DashboardLayout from './components/dashboard/DashboardLayout';
 import Dashboard from './components/dashboard/Dashboard';
-import Assignments from './components/dashboard/Assignments/Assignments';
-import CreateAssignment from './components/dashboard/Assignments/CreateAssignment';
+import Assignments from './components/dashboard/XYZ/Assignments';
+import CreateAssignment from './components/dashboard/XYZ/CreateAssignment';
 import {ProtectedRoute} from './components/ProtectedRoute';
 import {PublicRoute} from './components/auth/PublicRoute';
 import './App.css';
 import Home from './components/Home';
-import Generate from './components/dashboard/Assignments/Generate';
+import Generate from './components/dashboard/XYZ/Generate';
 import { AssignmentProvider } from './context/AssignmentContext';
 import { AuthProvider } from './context/AuthContext';
-import AssignmentDetails from './components/dashboard/Assignments/AssignmentDetails';
-import EditAssignment from './components/dashboard/Assignments/EditAssignment';
+import AssignmentDetails from './components/dashboard/XYZ/AssignmentDetails';
+import EditAssignment from './components/dashboard/XYZ/EditAssignment';
+import ClassRoom from './components/dashboard/Classroom/ClassRoom';
+import CoursesPage from './components/dashboard/Courses/Courses';
+import CourseDetails from './components/dashboard/Courses/CourseDetails';
+import CreateCoursePage from './components/dashboard/Courses/CoursesCreate';
+
+import EditSyllabus from './components/dashboard/Courses/EditSyllabus';
 
 function App() {
   return (
@@ -34,11 +40,16 @@ function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<DashboardLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/dashboard/assignments" element={<Assignments />} />
-                <Route path="/dashboard/create-assignment" element={<CreateAssignment />} />
-                <Route path="/dashboard/generate" element={<Generate />} />
-                <Route path='/dashboard/assignments/:id' element={<AssignmentDetails />} />
-                <Route path='/dashboard/assignments/:id/edit' element={<EditAssignment />} />
+                  <Route path="/dashboard/assignments" element={<Assignments />} />
+                  <Route path="/dashboard/create-assignment" element={<CreateAssignment />} />
+                  <Route path="/dashboard/generate" element={<Generate />} />
+                  <Route path='/dashboard/assignments/:id' element={<AssignmentDetails />} />
+                  <Route path='/dashboard/assignments/:id/edit' element={<EditAssignment />} />
+                <Route path='/dashboard/classroompage' element={<ClassRoom />} />
+                <Route path='/dashboard/courses' element={<CoursesPage />} />
+                <Route path='/dashboard/courses/:id' element={<CourseDetails />} />
+                <Route path='/dashboard/courses/create' element={<CreateCoursePage   />} />
+                <Route path='/dashboard/edit-syllabus' element={<EditSyllabus   />} />
               </Route>
             </Route>
 

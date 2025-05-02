@@ -60,6 +60,43 @@ export const assignmentApi = {
     } catch (error) {
       console.error(`Error fetching assignment answers ${id}:`, error);
     }
+  },
+
+  // Get all classes name and id
+  getAllClasses: async () => {
+    try {
+      const response = await api.get('classes/get-all-classes/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+      throw error;
+    }
+  },
+  getAllTeachers: async () => {
+    try {
+      const response = await api.get('auth/teachers/');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching teachers:', error);
+    }
+  },
+  getOptions: async () => {
+    try {
+      const response = await api.get('assignment/options');
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching options:', error);
+      throw error;
+    }
+  } ,
+  createResource: async (data: any, id: string) => {
+    try {
+      const response = await api.post(`assignment/add/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error creating question:', error);
+      throw error;
+    }
   }
 };
 
