@@ -127,8 +127,8 @@ export default function AssignmentsPage() {
                   <CardTitle>{assignment.title}</CardTitle>
                   <CardDescription>{assignment.topic}</CardDescription>
                   <CardDescription>{assignment.questions.length} questions</CardDescription>
-                  <CardDescription>{assignment.course.subject}</CardDescription>
-                  <CardDescription>{assignment.course.courseName}</CardDescription>
+                  <CardDescription>{assignment?.course?.subject}</CardDescription>
+                  <CardDescription>{assignment?.course?.courseName}</CardDescription>
                 </div>
                 <div className="flex flex-col  space-y-2">
                 <Badge>

@@ -1,5 +1,5 @@
 import {Link} from "react-router-dom"
-import { Plus } from "lucide-react"
+import { Loader2, Plus } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { PageHeader } from "@/components/page-header"
@@ -23,14 +23,15 @@ interface Course {
 
 export default function CoursesPage() {
   const [courses, setCourses] = useState<Course[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const fetchCourses = async () => {
     const { data } = await coursesApi.getAllCourses();
     setCourses(data);
+    setIsLoading(false);
   }
   useEffect(() => {
     fetchCourses();
   }, []);
-
 
   return (
     <div className="container mx-auto p-6">
@@ -43,6 +44,11 @@ export default function CoursesPage() {
           </Link>
         </Button>
       </div>
+      {isLoading&&(
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (

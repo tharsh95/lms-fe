@@ -1,4 +1,3 @@
-
 import {Link} from "react-router-dom";
 import type React from "react";
 
@@ -27,8 +26,11 @@ import {
   Zap,
   BookOpen,
   ShieldCheck,
+  Loader2,
 } from "lucide-react";
 import { Logo } from "@/components/logo";
+import { authApi } from "@/services/api";
+import { useNavigate } from "react-router-dom";
 
 // Custom icon components
 function GoogleIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -81,12 +83,36 @@ export default function SignupPage() {
   const [step, setStep] = useState(1);
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
+  const [password, setPassword] = useState("");
   const [billingCycle, setBillingCycle] = useState("yearly");
   const [selectedPlan, setSelectedPlan] = useState("department");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleContinue = (e: React.FormEvent) => {
+  const handleContinue = async (e: React.FormEvent) => {
     e.preventDefault();
-    setStep(step + 1);
+    if (step === 3) {
+      try {
+        setIsLoading(true);
+        setError("");
+        await authApi.register({
+          name,
+          email,
+          password,
+          plan: selectedPlan,
+          billingCycle
+        });
+        navigate("/dashboard/assignments");
+      } catch (err: unknown) {
+        const error = err as { response?: { data?: { message: string } } };
+        setError(error.response?.data?.message || "Registration failed. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    } else {
+      setStep(step + 1);
+    }
   };
 
   const handleBack = () => {
@@ -279,6 +305,11 @@ export default function SignupPage() {
           <CardContent className="space-y-4">
             {step === 1 ? (
               <form onSubmit={handleContinue} className="space-y-4">
+                {error && (
+                  <div className="p-3 text-sm text-red-500 bg-red-50 rounded-md">
+                    {error}
+                  </div>
+                )}
                 <div className="grid grid-cols-2 gap-4">
                   <Button variant="outline" className="w-full">
                     <GoogleIcon className="mr-2 h-5 w-5" />
@@ -332,6 +363,8 @@ export default function SignupPage() {
                       name="password"
                       type="password"
                       placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <p className="text-xs text-muted-foreground">
                       Password must be at least 8 characters
@@ -365,8 +398,15 @@ export default function SignupPage() {
                   </ul>
                 </div>
 
-                <Button className="w-full py-6 text-base" type="submit">
-                  Start Your Free, Effortless Teaching Journey
+                <Button className="w-full py-6 text-base" type="submit" disabled={isLoading}>
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    "Start Your Free, Effortless Teaching Journey"
+                  )}
                 </Button>
 
                 <p className="text-xs text-center text-muted-foreground">
@@ -642,11 +682,22 @@ export default function SignupPage() {
                 </div>
 
                 <div className="flex flex-col space-y-2">
-                  <Button className="w-full py-6 text-base" asChild>
-                    <Link to="/dashboard/assignments">
-                      <CreditCard className="mr-2 h-4 w-4" />
-                      Activate Your Trial — Secure & No Charges Today
-                    </Link>
+                  <Button 
+                    className="w-full py-6 text-base" 
+                    onClick={handleContinue}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Processing...
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="mr-2 h-4 w-4" />
+                        Activate Your Trial — Secure & No Charges Today
+                      </>
+                    )}
                   </Button>
 
                   <Button variant="ghost" onClick={handleBack} className="mt-2">

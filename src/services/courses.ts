@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Get base URL from environment variable or use default
-const BASE_URL = 'http://localhost:3030/api';
+const BASE_URL = import.meta.env.VITE_API_URL;
 
 // Create axios instance with default config
 const api = axios.create({
@@ -32,7 +32,12 @@ export const coursesApi = {
     });
     return response.data;
   },
-  createSyllabuswithAI: async (body: any) => {
+  createSyllabuswithAI: async (body: {
+    title: string;
+    description: string;
+    topic: string;
+    level: string;
+  }) => {
     const response = await api.post('/courses/create-with-ai',body,{
       headers: {
         'Content-Type': 'application/json',
@@ -46,7 +51,7 @@ export const coursesApi = {
     const response = await api.get(`/courses/${id}`);
     return response.data;
   },
-  updateCourse: async (course: any) => {
+  updateCourse: async (course: { id: string; title: string; description: string; topic: string; level: string }) => {
     const response = await api.put(`/courses/${course.id}`, course, {
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +63,7 @@ export const coursesApi = {
     const response = await api.get('/courses');
     return response.data;
   },
-  createCourse: async (course: any) => {
+  createCourse: async (course: { title: string; description: string; topic: string; level: string }) => {
     const response = await api.post('courses/', course, {
       headers: {
         'Content-Type': 'application/json',
