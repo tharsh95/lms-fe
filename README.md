@@ -1,54 +1,126 @@
-# React + TypeScript + Vite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-Currently, two official plugins are available:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+          
+# M32 Client Application
 
-## Expanding the ESLint configuration
+A modern educational content management system built with React, TypeScript, and Vite. This application provides a hierarchical structure for managing Classes (Subjects), Courses, and Assignments.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## 🚀 Features
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- **Class Management**: Create and manage subject areas
+- **Course Organization**: Structure courses within classes
+- **Assignment Handling**: Create and track assignments
+- **Protected Routes**: Secure authentication system
+- **File Upload**: Support for course syllabus
+## 🛠 Tech Stack
+
+- **Frontend**: React + TypeScript
+- **Build Tool**: Vite
+- **Styling**: TailwindCSS
+- **Code Quality**: ESLint
+
+## 📋 Prerequisites
+
+- Node.js (v18 or higher)
+- npm or yarn package manager
+
+## 🚀 Getting Started
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/tharsh95/lms-be.git
+
+   ```
+1. **Install Dependencies**
+   ```bash
+   npm install
+   ```
+
+2. **Start Development Server**
+   ```bash
+   npm run dev
+   ```
+   Access the application at `http://localhost:5173`
+
+## 📁 Project Structure
+
+```plaintext
+src/
+  ├── components/     # React components
+  │   ├── auth/       # Authentication components
+  │   ├── dashboard/  # Dashboard views
+  │   └── ui/         # Reusable UI components
+  ├── context/        # React context providers
+  ├── services/       # API services
+  ├── utils/          # Utility functions
+  └── assets/         # Static assets
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 📚 Content Management Guide
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### 1️⃣ Class (Subject) Management
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+Classes are the top-level organizational units:
+
+1. Navigate to Classes dashboard
+2. Click "Create New Class"
+3. Fill required information:
+   - Class Name
+   - Description
+   - Subject 
+   - Grade
+   - Section
+
+### 2️⃣ Course Management
+
+Courses exist within Classes:
+
+1. Click "Create New Course"
+2. Provide details:
+   - Course Name
+   - Subject
+   - Description
+   - Grade 
+On filling the form, it is asked to upload a course syllabus or Generate using AI.
+
+### 3️⃣ Assignment Management
+
+Assignments belong to Courses:
+
+1. Open desired Course
+2. Select "Create Assignment"
+3. Define parameters:
+   - Title
+   - Instructions
+   - Due Date
+   - Points/Grading Criteria
+   - Attachments
+
+## 💻 Development
+
+### Available Scripts
+
+```bash
+npm run dev      # Start development server
+npm run build    # Build for production
+npm run preview  # Preview production build
+npm run lint     # Run ESLint
 ```
+
+
+## 🔒 Authentication
+
+The application implements protected routes through the `AuthContext` provider. Users must authenticate to access content management features.
+
+## 📤 File Upload
+
+The `FileUpload` component manages file attachments for courses and assignments. Configure supported file types and size limits in the constants file.
+
+## 🤝 Contributing
+
+1. Create a feature branch
+2. Implement changes
+3. Submit a pull request
+
+
+        
