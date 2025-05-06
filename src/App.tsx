@@ -1,5 +1,5 @@
 import {
-  BrowserRouter as Router,
+  HashRouter as Router,
   Routes,
   Route,
   Navigate,
@@ -15,7 +15,6 @@ import { PublicRoute } from "./components/auth/PublicRoute";
 import "./App.css";
 import Home from "./components/Home";
 import Generate from "./components/dashboard/Assignment/Generate";
-// import { AssignmentProvider } from './context/AssignmentContext';
 import { AuthProvider } from "./context/AuthContext";
 import AssignmentDetails from "./components/dashboard/Assignment/AssignmentDetails";
 import EditAssignment from "./components/dashboard/Assignment/EditAssignment";
