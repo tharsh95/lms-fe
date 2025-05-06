@@ -33,10 +33,14 @@ export const coursesApi = {
     return response.data;
   },
   createSyllabuswithAI: async (body: {
-    title: string;
-    description: string;
-    topic: string;
-    level: string;
+    prompt: string;
+    additionalInfo: string;
+    courseDetails: {
+        courseName: string;
+        description: string;
+        subject: string;
+        grade: string;
+    };
   }) => {
     const response = await api.post('/courses/create-with-ai',body,{
       headers: {

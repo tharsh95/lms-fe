@@ -19,7 +19,7 @@ interface SyllabusPreviewProps {
       week: string;
       topic: string;
       readings: string;
-      assignments: string;
+      assignments: string;  
     }>;
     policies: Record<string, string>;
   };

@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import {
   Loader2,
@@ -59,8 +57,62 @@ export function SyllabusCreator({
   setIsCreating,
 }: SyllabusCreatorProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [syllabusData, setSyllabusData] = useState<any>(null);
-  const [courseData, setCourseData] = useState<any>(null);
+  const [syllabusData, setSyllabusData] = useState<{
+    courseTitle: string;
+    instructor: string;
+    term: string;
+    courseDescription: string;
+    learningObjectives: string[];
+    requiredMaterials: Array<{
+      title: string;
+      author: string;
+      publisher: string;
+      year: string;
+      required: boolean;
+    }>;
+    gradingPolicy: Record<
+      string,
+      {
+        percentage: number;
+        description: string;
+      }
+    >;
+    weeklySchedule: Array<{
+      week: number;
+      topic: string;
+      readings: string;
+      assignments: string;
+    }>;
+    policies: Record<string, string>;
+  } | null>(null);
+  const [courseData, setCourseData] = useState<{
+    courseTitle: string;
+    instructor: string;
+    term: string;
+    courseDescription: string;
+    learningObjectives: string[];
+    requiredMaterials: Array<{
+      title: string;
+      author: string;
+      publisher: string;
+      year: string;
+      required: boolean;
+    }>;
+    gradingPolicy: Record<
+      string,
+      {
+        percentage: number;
+        description: string;
+      }
+    >;
+    weeklySchedule: Array<{
+      week: number;
+      topic: string;
+      readings: string;
+      assignments: string;
+    }>;
+    policies: Record<string, string>;
+  } | null>(null);
   const [prompt, setPrompt] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
@@ -85,25 +137,28 @@ export function SyllabusCreator({
     const syllabus = mapSyllabus(data);
 
     setSyllabusData(syllabus);
-      setIsGenerating(false);
-      setActiveTab2("edit");
-
+    setIsGenerating(false);
+    setActiveTab2("edit");
   };
-const handleCreateCourse = async () => {
-  try {
-    setIsCreating(true);
-    const course = mapSyllabus( courseData);
-    await coursesApi.createCourse(course);
-    setIsCreating(false);
-    navigate("/dashboard/courses");
-  } catch (error) {
-    console.error("Error creating course:", error);
-    setIsCreating(false);
-  }
-  finally {
-    setIsCreating(false);
-  }
-}
+  const handleCreateCourse = async () => {
+    try {
+      setIsCreating(true);
+      const course = mapSyllabus(courseData);
+      await coursesApi.createCourse({
+        title: course.courseTitle,
+        description: course.courseDescription,
+        topic: courseDetails.subject,
+        level: courseDetails.grade,
+      });
+      setIsCreating(false);
+      navigate("/dashboard/courses");
+    } catch (error) {
+      console.error("Error creating course:", error);
+      setIsCreating(false);
+    } finally {
+      setIsCreating(false);
+    }
+  };
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -134,7 +189,7 @@ const handleCreateCourse = async () => {
 
   const handleDownloadPDF = () => {
     if (!syllabusData) return;
-    
+
     const doc = new jsPDF();
     let y = 20;
     const lineHeight = 7;
@@ -155,11 +210,11 @@ const handleCreateCourse = async () => {
     y += lineHeight;
     doc.text(`Term: ${syllabusData.term || ""}`, margin, y);
     y += lineHeight;
-    
+
     // Course Description
     const descriptionLines = doc.splitTextToSize(
       `Description: ${syllabusData.courseDescription || ""}`,
-      pageWidth - (margin * 2)
+      pageWidth - margin * 2
     );
     doc.text(descriptionLines, margin, y);
     y += lineHeight * descriptionLines.length + lineHeight;
@@ -170,7 +225,10 @@ const handleCreateCourse = async () => {
     y += lineHeight;
     doc.setFontSize(12);
     syllabusData.learningObjectives.forEach((objective: string) => {
-      const objLines = doc.splitTextToSize(`• ${objective}`, pageWidth - (margin * 2));
+      const objLines = doc.splitTextToSize(
+        `• ${objective}`,
+        pageWidth - margin * 2
+      );
       doc.text(objLines, margin, y);
       y += lineHeight * objLines.length;
     });
@@ -181,12 +239,25 @@ const handleCreateCourse = async () => {
     doc.text("Required Materials", margin, y);
     y += lineHeight;
     doc.setFontSize(12);
-    syllabusData.requiredMaterials.forEach((material: any) => {
-      const materialText = `${material.title} by ${material.author} (${material.publisher}, ${material.year}) - ${material.required ? "Required" : "Optional"}`;
-      const materialLines = doc.splitTextToSize(materialText, pageWidth - (margin * 2));
-      doc.text(materialLines, margin, y);
-      y += lineHeight * materialLines.length;
-    });
+    syllabusData.requiredMaterials.forEach(
+      (material: {
+        title: string;
+        author: string;
+        publisher: string;
+        year: string;
+        required: boolean;
+      }) => {
+        const materialText = `${material.title} by ${material.author} (${
+          material.publisher
+        }, ${material.year}) - ${material.required ? "Required" : "Optional"}`;
+        const materialLines = doc.splitTextToSize(
+          materialText,
+          pageWidth - margin * 2
+        );
+        doc.text(materialLines, margin, y);
+        y += lineHeight * materialLines.length;
+      }
+    );
     y += lineHeight;
 
     // Grading Policy
@@ -194,12 +265,19 @@ const handleCreateCourse = async () => {
     doc.text("Grading Policy", margin, y);
     y += lineHeight;
     doc.setFontSize(12);
-    Object.entries(syllabusData.gradingPolicy).forEach(([key, value]: [string, any]) => {
-      const policyText = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${value.percentage}% - ${value.description}`;
-      const policyLines = doc.splitTextToSize(policyText, pageWidth - (margin * 2));
-      doc.text(policyLines, margin, y);
-      y += lineHeight * policyLines.length;
-    });
+    Object.entries(syllabusData.gradingPolicy).forEach(
+      ([key, value]: [string, { percentage: number; description: string }]) => {
+        const policyText = `${key.charAt(0).toUpperCase() + key.slice(1)}: ${
+          value.percentage
+        }% - ${value.description}`;
+        const policyLines = doc.splitTextToSize(
+          policyText,
+          pageWidth - margin * 2
+        );
+        doc.text(policyLines, margin, y);
+        y += lineHeight * policyLines.length;
+      }
+    );
     y += lineHeight;
 
     // Weekly Schedule
@@ -207,39 +285,49 @@ const handleCreateCourse = async () => {
     doc.text("Weekly Schedule", margin, y);
     y += lineHeight;
     doc.setFontSize(12);
-    syllabusData.weeklySchedule.forEach((week: any) => {
-      if (y > doc.internal.pageSize.height - margin) {
-        doc.addPage();
-        y = margin;
+    syllabusData.weeklySchedule.forEach(
+      (week: {
+        week: number;
+        topic: string;
+        readings: string;
+        assignments: string;
+      }) => {
+        if (y > doc.internal.pageSize.height - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        const weekText = `Week ${week.week}: ${week.topic}`;
+        doc.text(weekText, margin, y);
+        y += lineHeight;
+        const readingsText = `Readings: ${week.readings}`;
+        doc.text(readingsText, margin, y);
+        y += lineHeight;
+        const assignmentsText = `Assignments: ${week.assignments}`;
+        doc.text(assignmentsText, margin, y);
+        y += lineHeight * 2;
       }
-      const weekText = `Week ${week.week}: ${week.topic}`;
-      doc.text(weekText, margin, y);
-      y += lineHeight;
-      const readingsText = `Readings: ${week.readings}`;
-      doc.text(readingsText, margin, y);
-      y += lineHeight;
-      const assignmentsText = `Assignments: ${week.assignments}`;
-      doc.text(assignmentsText, margin, y);
-      y += lineHeight * 2;
-    });
+    );
 
     // Course Policies
     doc.setFontSize(14);
     doc.text("Course Policies", margin, y);
     y += lineHeight;
     doc.setFontSize(12);
-    Object.entries(syllabusData.policies).forEach(([key, value]: [string, any]) => {
-      if (y > doc.internal.pageSize.height - margin) {
-        doc.addPage();
-        y = margin;
+    Object.entries(syllabusData.policies).forEach(
+      ([key, value]: [string, string]) => {
+        if (y > doc.internal.pageSize.height - margin) {
+          doc.addPage();
+          y = margin;
+        }
+        const policyTitle =
+          key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1");
+        doc.text(policyTitle, margin, y);
+        y += lineHeight;
+        const policyLines = doc.splitTextToSize(value, pageWidth - margin * 2);
+        doc.text(policyLines, margin, y);
+        y += lineHeight * policyLines.length + lineHeight;
       }
-      const policyTitle = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1");
-      doc.text(policyTitle, margin, y);
-      y += lineHeight;
-      const policyLines = doc.splitTextToSize(value, pageWidth - (margin * 2));
-      doc.text(policyLines, margin, y);
-      y += lineHeight * policyLines.length + lineHeight;
-    });
+    );
 
     // Save the PDF
     doc.save(`${syllabusData.courseTitle || "syllabus"}.pdf`);
@@ -501,10 +589,10 @@ const handleCreateCourse = async () => {
                       <div className="space-y-4">
                         {syllabusData.learningObjectives.map(
                           (objective: string, index: number) => (
-                          <div key={index} className="flex items-start gap-2">
-                            <Input
-                              value={objective}
-                              onChange={(e) => {
+                            <div key={index} className="flex items-start gap-2">
+                              <Input
+                                value={objective}
+                                onChange={(e) => {
                                   const newObjectives = [
                                     ...syllabusData.learningObjectives,
                                   ];
@@ -513,25 +601,25 @@ const handleCreateCourse = async () => {
                                     ...syllabusData,
                                     learningObjectives: newObjectives,
                                   });
-                              }}
-                            />
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
+                                }}
+                              />
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
                                   const newObjectives =
                                     syllabusData.learningObjectives.filter(
-                                      (_: any, i: number) => i !== index
+                                      (_, i: number) => i !== index
                                     );
                                   setSyllabusData({
                                     ...syllabusData,
                                     learningObjectives: newObjectives,
                                   });
-                              }}
-                            >
-                              ✕
-                            </Button>
-                          </div>
+                                }}
+                              >
+                                ✕
+                              </Button>
+                            </div>
                           )
                         )}
                         <Button
@@ -557,9 +645,18 @@ const handleCreateCourse = async () => {
                     <AccordionContent>
                       <div className="space-y-4">
                         {syllabusData.requiredMaterials.map(
-                          (material: any, index: number) => (
-                          <div key={index} className="border p-3 rounded-md">
-                            <div className="flex justify-between items-center mb-2">
+                          (
+                            material: {
+                              title: string;
+                              author: string;
+                              publisher: string;
+                              year: string;
+                              required: boolean;
+                            },
+                            index: number
+                          ) => (
+                            <div key={index} className="border p-3 rounded-md">
+                              <div className="flex justify-between items-center mb-2">
                                 <h4 className="font-medium">
                                   Material {index + 1}
                                 </h4>
@@ -568,18 +665,18 @@ const handleCreateCourse = async () => {
                                     material.required ? "default" : "outline"
                                   }
                                 >
-                                {material.required ? "Required" : "Optional"}
-                              </Badge>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                              <div>
+                                  {material.required ? "Required" : "Optional"}
+                                </Badge>
+                              </div>
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
                                   <Label htmlFor={`material-title-${index}`}>
                                     Title
                                   </Label>
-                                <Input
-                                  id={`material-title-${index}`}
-                                  value={material.title}
-                                  onChange={(e) => {
+                                  <Input
+                                    id={`material-title-${index}`}
+                                    value={material.title}
+                                    onChange={(e) => {
                                       const newMaterials = [
                                         ...syllabusData.requiredMaterials,
                                       ];
@@ -591,17 +688,17 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         requiredMaterials: newMaterials,
                                       });
-                                  }}
-                                />
-                              </div>
-                              <div>
+                                    }}
+                                  />
+                                </div>
+                                <div>
                                   <Label htmlFor={`material-author-${index}`}>
                                     Author
                                   </Label>
-                                <Input
-                                  id={`material-author-${index}`}
-                                  value={material.author}
-                                  onChange={(e) => {
+                                  <Input
+                                    id={`material-author-${index}`}
+                                    value={material.author}
+                                    onChange={(e) => {
                                       const newMaterials = [
                                         ...syllabusData.requiredMaterials,
                                       ];
@@ -613,19 +710,19 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         requiredMaterials: newMaterials,
                                       });
-                                  }}
-                                />
-                              </div>
-                              <div>
+                                    }}
+                                  />
+                                </div>
+                                <div>
                                   <Label
                                     htmlFor={`material-publisher-${index}`}
                                   >
                                     Publisher
                                   </Label>
-                                <Input
-                                  id={`material-publisher-${index}`}
-                                  value={material.publisher}
-                                  onChange={(e) => {
+                                  <Input
+                                    id={`material-publisher-${index}`}
+                                    value={material.publisher}
+                                    onChange={(e) => {
                                       const newMaterials = [
                                         ...syllabusData.requiredMaterials,
                                       ];
@@ -637,17 +734,17 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         requiredMaterials: newMaterials,
                                       });
-                                  }}
-                                />
-                              </div>
-                              <div>
+                                    }}
+                                  />
+                                </div>
+                                <div>
                                   <Label htmlFor={`material-year-${index}`}>
                                     Year
                                   </Label>
-                                <Input
-                                  id={`material-year-${index}`}
-                                  value={material.year}
-                                  onChange={(e) => {
+                                  <Input
+                                    id={`material-year-${index}`}
+                                    value={material.year}
+                                    onChange={(e) => {
                                       const newMaterials = [
                                         ...syllabusData.requiredMaterials,
                                       ];
@@ -659,15 +756,15 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         requiredMaterials: newMaterials,
                                       });
-                                  }}
-                                />
+                                    }}
+                                  />
+                                </div>
                               </div>
-                            </div>
-                            <div className="flex items-center space-x-2 mt-3">
-                              <Switch
-                                id={`required-${index}`}
-                                checked={material.required}
-                                onCheckedChange={(checked) => {
+                              <div className="flex items-center space-x-2 mt-3">
+                                <Switch
+                                  id={`required-${index}`}
+                                  checked={material.required}
+                                  onCheckedChange={(checked) => {
                                     const newMaterials = [
                                       ...syllabusData.requiredMaterials,
                                     ];
@@ -684,8 +781,8 @@ const handleCreateCourse = async () => {
                                 <Label htmlFor={`required-${index}`}>
                                   Required
                                 </Label>
+                              </div>
                             </div>
-                          </div>
                           )
                         )}
                         <Button
@@ -717,19 +814,22 @@ const handleCreateCourse = async () => {
                     <AccordionContent>
                       <div className="space-y-4">
                         {Object.entries(syllabusData.gradingPolicy).map(
-                          ([key, value]: [string, any]) => (
+                          ([key, value]: [
+                            string,
+                            { percentage: number; description: string }
+                          ]) => (
                             <div
                               key={key}
                               className="grid grid-cols-1 md:grid-cols-3 gap-3 items-end"
                             >
-                            <div>
+                              <div>
                                 <Label htmlFor={`grading-${key}`}>
                                   {key.charAt(0).toUpperCase() + key.slice(1)}
                                 </Label>
-                              <Input
-                                id={`grading-${key}`}
-                                value={value.description}
-                                onChange={(e) => {
+                                <Input
+                                  id={`grading-${key}`}
+                                  value={value.description}
+                                  onChange={(e) => {
                                     const newGradingPolicy = {
                                       ...syllabusData.gradingPolicy,
                                     };
@@ -741,21 +841,21 @@ const handleCreateCourse = async () => {
                                       ...syllabusData,
                                       gradingPolicy: newGradingPolicy,
                                     });
-                                }}
-                              />
-                            </div>
-                            <div>
+                                  }}
+                                />
+                              </div>
+                              <div>
                                 <Label htmlFor={`percentage-${key}`}>
                                   Percentage
                                 </Label>
-                              <div className="flex items-center">
-                                <Input
-                                  id={`percentage-${key}`}
-                                  type="number"
-                                  min="0"
-                                  max="100"
-                                  value={value.percentage}
-                                  onChange={(e) => {
+                                <div className="flex items-center">
+                                  <Input
+                                    id={`percentage-${key}`}
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    value={value.percentage}
+                                    onChange={(e) => {
                                       const newGradingPolicy = {
                                         ...syllabusData.gradingPolicy,
                                       };
@@ -769,15 +869,15 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         gradingPolicy: newGradingPolicy,
                                       });
-                                  }}
-                                />
-                                <span className="ml-2">%</span>
+                                    }}
+                                  />
+                                  <span className="ml-2">%</span>
+                                </div>
                               </div>
-                            </div>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => {
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
                                   const newGradingPolicy = {
                                     ...syllabusData.gradingPolicy,
                                   };
@@ -786,11 +886,11 @@ const handleCreateCourse = async () => {
                                     ...syllabusData,
                                     gradingPolicy: newGradingPolicy,
                                   });
-                              }}
-                            >
-                              ✕
-                            </Button>
-                          </div>
+                                }}
+                              >
+                                ✕
+                              </Button>
+                            </div>
                           )
                         )}
                         <Button
@@ -823,20 +923,28 @@ const handleCreateCourse = async () => {
                     <AccordionContent>
                       <div className="space-y-4">
                         {syllabusData.weeklySchedule.map(
-                          (week: any, index: number) => (
-                          <div key={index} className="border p-3 rounded-md">
+                          (
+                            week: {
+                              week: number;
+                              topic: string;
+                              readings: string;
+                              assignments: string;
+                            },
+                            index: number
+                          ) => (
+                            <div key={index} className="border p-3 rounded-md">
                               <h4 className="font-medium mb-2">
                                 Week {week.week}
                               </h4>
-                            <div className="grid grid-cols-1 gap-3">
-                              <div>
+                              <div className="grid grid-cols-1 gap-3">
+                                <div>
                                   <Label htmlFor={`week-topic-${index}`}>
                                     Topic
                                   </Label>
-                                <Input
-                                  id={`week-topic-${index}`}
-                                  value={week.topic}
-                                  onChange={(e) => {
+                                  <Input
+                                    id={`week-topic-${index}`}
+                                    value={week.topic}
+                                    onChange={(e) => {
                                       const newSchedule = [
                                         ...syllabusData.weeklySchedule,
                                       ];
@@ -848,17 +956,17 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         weeklySchedule: newSchedule,
                                       });
-                                  }}
-                                />
-                              </div>
-                              <div>
+                                    }}
+                                  />
+                                </div>
+                                <div>
                                   <Label htmlFor={`week-readings-${index}`}>
                                     Readings
                                   </Label>
-                                <Input
-                                  id={`week-readings-${index}`}
-                                  value={week.readings}
-                                  onChange={(e) => {
+                                  <Input
+                                    id={`week-readings-${index}`}
+                                    value={week.readings}
+                                    onChange={(e) => {
                                       const newSchedule = [
                                         ...syllabusData.weeklySchedule,
                                       ];
@@ -870,17 +978,17 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         weeklySchedule: newSchedule,
                                       });
-                                  }}
-                                />
-                              </div>
-                              <div>
+                                    }}
+                                  />
+                                </div>
+                                <div>
                                   <Label htmlFor={`week-assignments-${index}`}>
                                     Assignments
                                   </Label>
-                                <Input
-                                  id={`week-assignments-${index}`}
-                                  value={week.assignments}
-                                  onChange={(e) => {
+                                  <Input
+                                    id={`week-assignments-${index}`}
+                                    value={week.assignments}
+                                    onChange={(e) => {
                                       const newSchedule = [
                                         ...syllabusData.weeklySchedule,
                                       ];
@@ -892,11 +1000,11 @@ const handleCreateCourse = async () => {
                                         ...syllabusData,
                                         weeklySchedule: newSchedule,
                                       });
-                                  }}
-                                />
+                                    }}
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
                           )
                         )}
                         <div className="flex justify-between">
@@ -936,7 +1044,7 @@ const handleCreateCourse = async () => {
                                 weeklySchedule: newSchedule,
                               });
                             }}
-                            disabled={syllabusData.weeklySchedule.length}
+                            disabled={syllabusData.weeklySchedule.length === 0}
                           >
                             Remove Last Week
                           </Button>
@@ -950,17 +1058,17 @@ const handleCreateCourse = async () => {
                     <AccordionContent>
                       <div className="space-y-4">
                         {Object.entries(syllabusData.policies).map(
-                          ([key, value]: [string, any]) => (
-                          <div key={key}>
-                            <Label htmlFor={`policy-${key}`}>
+                          ([key, value]: [string, string]) => (
+                            <div key={key}>
+                              <Label htmlFor={`policy-${key}`}>
                                 {key.charAt(0).toUpperCase() +
                                   key.slice(1).replace(/([A-Z])/g, " $1")}{" "}
                                 Policy
-                            </Label>
-                            <Textarea
-                              id={`policy-${key}`}
-                              value={value}
-                              onChange={(e) => {
+                              </Label>
+                              <Textarea
+                                id={`policy-${key}`}
+                                value={value}
+                                onChange={(e) => {
                                   const newPolicies = {
                                     ...syllabusData.policies,
                                   };
@@ -969,10 +1077,10 @@ const handleCreateCourse = async () => {
                                     ...syllabusData,
                                     policies: newPolicies,
                                   });
-                              }}
-                              className="min-h-[100px] mt-2"
-                            />
-                          </div>
+                                }}
+                                className="min-h-[100px] mt-2"
+                              />
+                            </div>
                           )
                         )}
                         <Button
@@ -1014,7 +1122,13 @@ const handleCreateCourse = async () => {
                     onClick={() => {
                       const course = mapCourse(syllabusData, courseData);
 
-                      coursesApi.updateCourse(course);
+                      coursesApi.updateCourse({
+                        id: course.id,
+                        title: courseDetails.courseName,
+                        description: courseDetails.description,
+                        topic: courseDetails.subject,
+                        level: courseDetails.grade,
+                      });
                     }}
                   >
                     <Save className="mr-2 h-4 w-4" />
@@ -1023,7 +1137,7 @@ const handleCreateCourse = async () => {
                 </div>
                 <Button
                   onClick={() => {
-                    setActiveTab2("preview")
+                    setActiveTab2("preview");
                   }}
                 >
                   <Check className="mr-2 h-4 w-4" />
@@ -1066,7 +1180,15 @@ const handleCreateCourse = async () => {
 
               <Card className="border-2">
                 <CardContent className="p-6">
-                  <SyllabusPreview syllabusData={syllabusData} />
+                  <SyllabusPreview 
+                    syllabusData={{
+                      ...syllabusData,
+                      weeklySchedule: syllabusData.weeklySchedule.map(week => ({
+                        ...week,
+                        week: week.week.toString() // Convert week number to string
+                      }))
+                    }} 
+                  />
                 </CardContent>
               </Card>
             </>

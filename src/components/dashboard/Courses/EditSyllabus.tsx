@@ -124,7 +124,7 @@ const EditSyllabus: React.FC = () => {
                                 onClick={() => {
                                   const newObjectives =
                                     syllabusData.learningObjectives.filter(
-                                      (_: any, i: number) => i !== index
+                                      (_: string, i: number) => i !== index
                                     );
                                   setSyllabusData({
                                     ...syllabusData,
@@ -160,7 +160,7 @@ const EditSyllabus: React.FC = () => {
                     <AccordionContent>
                       <div className="space-y-4">
                         {syllabusData.requiredMaterials.map(
-                          (material: any, index: number) => (
+                          (material: { title: string; author: string; publisher: string; year: string; required: boolean }, index: number) => (
                             <div key={index} className="border p-3 rounded-md">
                               <div className="flex justify-between items-center mb-2">
                                 <h4 className="font-medium">
@@ -426,7 +426,7 @@ const EditSyllabus: React.FC = () => {
                     <AccordionContent>
                       <div className="space-y-4">
                         {syllabusData.weeklySchedule.map(
-                          (week: any, index: number) => (
+                          (week: { week: number; topic: string; readings: string; assignments: string }, index: number) => (
                             <div key={index} className="border p-3 rounded-md">
                               <h4 className="font-medium mb-2">
                                 Week {week.week}
@@ -603,7 +603,13 @@ const EditSyllabus: React.FC = () => {
                     variant="default"
                     onClick={async () => {
                       const course = mapCourse(syllabusData, courseData);
-                      await coursesApi.updateCourse(course);
+                      await coursesApi.updateCourse({
+                        id: course.id,
+                        title: course.courseName,
+                        description: course.description,
+                        topic: course.subject,
+                        level: course.grade
+                      });
                       navigate(`/dashboard/courses/${courseData._id}`);
                     }}
                   >

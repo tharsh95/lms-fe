@@ -46,13 +46,19 @@ export const assignmentApi = {
     }
   },
   generateAssignment: async (assignment: {
+    questionType: {
+      title: string;
+      description: string;
+      outputs: string[];
+    };
     title: string;
-    description: string;
-    dueDate: string;
-    classId: string;
-    teacherId: string;
     subject: string;
+    course: string;
     grade: string;
+    difficulty: string;
+    description: string;
+    numberOfQuestions: number | undefined;
+    publishToLMS: string[];
   }) => {
     try {
       const response = await api.post('/assignment/generate', assignment);
@@ -96,8 +102,15 @@ export const assignmentApi = {
       console.error('Error fetching options:', error);
       throw error;
     }
-  } ,
-  createResource: async (data: { content: string; type: string; title?: string }, id: string) => {
+  },
+  createResource: async (data: {
+    _id: string;
+    question: string;
+    type: string;
+    points: number;
+    options: string[];
+    answer: string;
+  }, id: string) => {
     try {
       const response = await api.post(`assignment/add/${id}`, data);
       return response.data;
@@ -106,16 +119,19 @@ export const assignmentApi = {
       throw error;
     }
   },
-  getEditAssignment: async (id: string|undefined
+  getEditAssignment: async (id: string | undefined
   ) => {
     try {
       const response = await api.get(`assignment/edit/${id}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching edit assignment:', error);  
+      console.error('Error fetching edit assignment:', error);
     }
   },
-  addInstruction: async (data: { instruction: string }, id: string) => {
+  addInstruction: async (data: {
+    title: string;
+    content: string;
+  }, id: string) => {
     try {
       const response = await api.post(`assignment/instructions/${id}`, data);
       return response.data;
@@ -123,7 +139,12 @@ export const assignmentApi = {
       console.error('Error adding instruction:', error);
     }
   },
-  addRubric: async (data: { criteria: string; points: number }[], id: string) => {
+  addRubric: async (data: {
+    _id: string;
+    Criterion: string;
+    Points: number;
+    Description: string;
+  }, id: string) => {
     try {
       const response = await api.post(`assignment/rubrics/${id}`, data);
       return response.data;
@@ -139,7 +160,7 @@ export const assignmentApi = {
       console.error('Error deleting resource:', error);
     }
   },
-  
+
   updateAssignment: async (id: string, data: {
     title?: string;
     description?: string;
@@ -157,7 +178,11 @@ export const assignmentApi = {
       throw error;
     }
   },
-  addChecklist: async (data: { item: string; points: number }[], id: string) => {
+  addChecklist: async (data: {
+    _id: string;
+    item: string;
+    required: boolean
+  }, id: string) => {
     try {
       const response = await api.post(`assignment/checklist/${id}`, data);
       return response.data;
@@ -166,7 +191,7 @@ export const assignmentApi = {
       throw error;
     }
   },
-  addParticipationCriteria: async (data: { criteria: string; points: number }[], id: string) => {
+  addParticipationCriteria: async (data: { Criterion: string; Description: string; Points: number, _id: string }, id: string) => {
     try {
       const response = await api.post(`assignment/participation-criteria/${id}`, data);
       return response.data;
