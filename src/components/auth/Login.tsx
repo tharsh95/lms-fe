@@ -67,13 +67,17 @@ export default function LoginPage() {
       await authApi.login({ email, password });
       login();
       navigate('/dashboard/assignments');
-    } catch (error) {
+    } catch {
       setError('Invalid email or password');
+      setEmail('');
+      setPassword('');
     } finally {
       setLoading(false);
     }
   };
-
+setTimeout(() => {
+  setError("")
+}, 3000);
   return (
     <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Left side - Benefits and testimonials (hidden on mobile) */}
@@ -180,6 +184,7 @@ export default function LoginPage() {
             <Button className="w-full" size="lg" onClick={handleLogin} disabled={loading}>
               {loading ? 'Logging in...' : 'Log in'}
             </Button>
+            {error && <p className="text-red-500 text-center">{error}</p>}
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 border-t pt-4">
             <div className="text-center text-sm">

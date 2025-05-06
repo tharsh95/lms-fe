@@ -215,24 +215,6 @@ export default function CreateCoursePage() {
                                 <SelectValue placeholder="Select a grade level" />
                               </SelectTrigger>
                             </FormControl>
-                            {/* <SelectContent>
-                              <SelectItem value="elementary">
-                                Elementary School
-                              </SelectItem>
-                              <SelectItem value="middleSchool">
-                                Middle School
-                              </SelectItem>
-                              <SelectItem value="highSchool">
-                                High School
-                              </SelectItem>
-                              <SelectItem value="undergraduate">
-                                Undergraduate
-                              </SelectItem>
-                              <SelectItem value="graduate">Graduate</SelectItem>
-                              <SelectItem value="professional">
-                                Professional
-                              </SelectItem>
-                            </SelectContent> */}
                             <SelectContent>
                               {!form.getValues("subject")&& (
                             <SelectItem  value="all" disabled>First Select Subject</SelectItem>)}

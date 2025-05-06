@@ -73,7 +73,10 @@ interface Option {
 interface CourseData {
   subject: string;
   grade: string;
-  name: string;
+  course: {
+    id: string;
+    name: string;
+  };
 }
 
 const CreateAssignment = () => {
@@ -88,7 +91,6 @@ const CreateAssignment = () => {
   const fetchOptions = async () => {
     try {
       const response = await assignmentApi.getOptions();
-      // console.log('Raw API Response:', response);
       
       if (response && response.success && Array.isArray(response.data)) {
         // Transform the data into our required format
@@ -101,7 +103,7 @@ const CreateAssignment = () => {
             // Find all subjects that have this grade
             const subjectsWithGrade = response.data
               .filter((item: CourseData) => item.grade === grade)
-              .map(item => item.subject);
+              .map((item: CourseData) => item.subject);
             return {
               id: grade,
               name: grade,
@@ -110,13 +112,11 @@ const CreateAssignment = () => {
           });
         
         const courses = response.data.map((course: CourseData) => ({
-          id: course.name,
-          name: course.name,
+          name: course.course.name,
+          id: course.course.id,
           subjectId: course.subject,
           gradeId: course.grade
         } as Option));
-
-        // console.log('Transformed data:', { uniqueSubjects, uniqueGrades, courses });
         
         setSubjects(uniqueSubjects);
         setGrades(uniqueGrades);
@@ -142,14 +142,14 @@ const CreateAssignment = () => {
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      type: "multiple_choice",
-      title: "mcq",
-      subject: "Physics",
-      course: "Refraction Through a Lens",
-      grade: "7",
-      difficulty: "Hard",
-      description: "Refraction Through a Lens",
-      numberOfQuestions: 10,
+      type: "",
+      title: "",
+      subject: "",
+      course: "",
+      grade: "",
+      difficulty: "",
+      description: "",
+      numberOfQuestions: 0,
       publishToLMS: [],
     },
   });
@@ -174,31 +174,32 @@ const CreateAssignment = () => {
 
   // Update filtered courses when grade changes
   useEffect(() => {
-    if (selectedGrade) {
-      const filtered = courses.filter(course => course.gradeId === selectedGrade);
+    if (selectedGrade && selectedSubject) {
+      const filtered = courses.filter(course => 
+        course.gradeId === selectedGrade && course.subjectId === selectedSubject
+      );
       setFilteredCourses(filtered);
       // Reset course when grade changes
       form.setValue("course", "");
     } else {
       setFilteredCourses([]);
     }
-  }, [selectedGrade, courses, form]);
+  }, [selectedGrade, selectedSubject, courses, form]);
 
   const selectedType = form.watch("type");
 
   const onSubmit = async () => {
     setIsGenerating(true);
     try {
-      console.log(form.getValues(), 'form');
-      const {data}=await assignmentApi.generateAssignment(form.getValues());
-      console.log(data,'data')
-      // Since handleDetailsSubmission is not available, we'll just simulate it
-      // await new Promise(resolve => setTimeout(resolve, 1000));
+      const {type,title,subject,course,grade,difficulty,description,numberOfQuestions,publishToLMS}=form.getValues();
+      const payload={questionType:ASSIGNMENT_TYPE_INFO[type as keyof typeof ASSIGNMENT_TYPE_INFO],title,subject,course,grade,difficulty,description,numberOfQuestions,publishToLMS};
+      const {data}=await assignmentApi.generateAssignment(payload);
+
       navigate("/dashboard/generate",{state:{data,formData:form.getValues()}});
     } catch (error) {
       console.error("Error submitting form:", error);
     } finally {
-      // setIsGenerating(false);
+      setIsGenerating(false);
     }
   };
 

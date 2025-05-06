@@ -31,7 +31,7 @@ export function CoTeachersList({ teachers }: CoTeachersListProps) {
             <TableCell>{teacher.role[0].toUpperCase() + teacher.role.slice(1)}</TableCell>
             <TableCell>
               <div className="flex flex-wrap gap-2">
-                {teacher.classes.map((cls) => (
+                {teacher.classes.map((cls: { classId: string; name: string; grade: string; section: string }) => (
                   <span
                     key={cls.classId}
                     className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"

@@ -82,20 +82,27 @@ export function SyllabusCreator({
     };
     const { data } = await coursesApi.createSyllabuswithAI(body);
     setCourseData(data);
-    console.log(data, "DATA")
     const syllabus = mapSyllabus(data);
-    console.log(syllabus, "SYLLABUS")
+
     setSyllabusData(syllabus);
       setIsGenerating(false);
       setActiveTab2("edit");
 
   };
 const handleCreateCourse = async () => {
-  setIsCreating(true);
-  const course = mapSyllabus( courseData);
-await coursesApi.createCourse(course);
-setIsCreating(false);
-navigate("/dashboard/courses");
+  try {
+    setIsCreating(true);
+    const course = mapSyllabus( courseData);
+    await coursesApi.createCourse(course);
+    setIsCreating(false);
+    navigate("/dashboard/courses");
+  } catch (error) {
+    console.error("Error creating course:", error);
+    setIsCreating(false);
+  }
+  finally {
+    setIsCreating(false);
+  }
 }
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -1006,7 +1013,7 @@ navigate("/dashboard/courses");
                     variant="outline"
                     onClick={() => {
                       const course = mapCourse(syllabusData, courseData);
-                      console.log(course, "NEW COURSE");
+
                       coursesApi.updateCourse(course);
                     }}
                   >

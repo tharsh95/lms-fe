@@ -97,6 +97,67 @@ export const assignmentApi = {
       console.error('Error creating question:', error);
       throw error;
     }
+  },
+  getEditAssignment: async (id: string|undefined
+  ) => {
+    try {
+      const response = await api.get(`assignment/edit/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error fetching edit assignment:', error);  
+    }
+  },
+  addInstruction: async (data: any, id: string) => {
+    try {
+      const response = await api.post(`assignment/instructions/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding instruction:', error);
+    }
+  },
+  addRubric: async (data: any, id: string) => {
+    try {
+      const response = await api.post(`assignment/rubrics/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding rubric:', error);
+    }
+  },
+  deleteResource: async (id: string, assignmentId: string, type: string) => {
+    try {
+      const response = await api.delete(`assignment/${assignmentId}/${type}/${id}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error deleting resource:', error);
+    }
+  },
+  
+  updateAssignment: async (id: string, data: any) => {
+    try {
+      const response = await api.put(`assignment/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error updating assignment:', error);
+      throw error;
+    }
+  },
+  addChecklist: async (data: any, id: string) => {
+    try {
+      const response = await api.post(`assignment/checklist/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding checklist item:', error);
+      throw error;
+    }
+  },
+  addParticipationCriteria: async (data: any, id: string) => {
+    try {
+      const response = await api.post(`assignment/participation-criteria/${id}`, data);
+      return response.data;
+    } catch (error) {
+      console.error('Error adding participation criteria:', error);
+      throw error;
+    }
   }
 };
 

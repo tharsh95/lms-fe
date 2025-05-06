@@ -1,10 +1,8 @@
 export const ASSIGNMENT_TYPES = {
     ESSAY: "essay",
 
-    MULTIPLE_CHOICE: "multiple_choice",
-    SHORT_ANSWER: "short_answer_test",
-    PRESENTATION: "presentation",
-  
+    MULTIPLE_CHOICE: "multiple_choice_quiz",
+    SHORT_ANSWER: "short_answer_test",  
     DISCUSSION: "discussion",
     CASE_STUDY: "case_study",
   }
@@ -25,23 +23,16 @@ export const ASSIGNMENT_TYPE_INFO = {
       description: "Questions requiring brief written responses",
       outputs: ["questions","answer_key"]
     },
-
-  
-    //   title: "Group Project",
-    //   description: "Collaborative work among multiple students",
-    //   icon: Users,
-    //   outputs: ["instructions", "rubric", "peer_evaluation"],
-    // },
     [ASSIGNMENT_TYPES.DISCUSSION]: {
       title: "Discussion",
       description: "Guided conversation on a specific topic",
-      outputs: ["instructions", "rubric"],
+      outputs: ["instructions", "rubric","checklist","participationCriteria"],
     },
    
   
     [ASSIGNMENT_TYPES.CASE_STUDY]: {
       title: "Case Study",
       description: "Analysis of a specific instance or scenario",
-      outputs: ["instructions", "rubric"],
+      outputs: ["participationCriteria", "checklist", "rubric"],
     },
   };

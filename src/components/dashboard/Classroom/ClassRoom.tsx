@@ -36,12 +36,9 @@ import { CoTeachersList } from "./co-teachers-list";
 import Classes from "./classes";
 import { Textarea } from "@/components/ui/textarea";
 
-interface ApiResponse {
-  success: boolean;
-  data: Student[];
-}
 
-interface Teacher {
+
+export interface Teacher {
   _id: string;
   name: string;
   email: string;
@@ -98,8 +95,12 @@ export default function ClassroomPage() {
   const fetchStudents = async () => {
     try {
       const {data} = await authApi.getStudents();
-      console.log(data, "RESPONSE")
-      setStudents(data);
+      // Transform the data to match Student interface
+      const transformedData = Array.isArray(data) ? data : [data].map(student => ({
+        ...student,
+        classes: Array.isArray(student.classes) ? student.classes : [student.classes]
+      }));
+      setStudents(transformedData);
     } catch (error) {
       console.error("Error fetching students:", error);
     }

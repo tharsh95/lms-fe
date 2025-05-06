@@ -1,7 +1,7 @@
-import { useState, useEffect } from "react"
-import {Link, useLocation, Outlet} from "react-router-dom"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react";
+import { Link, useLocation, Outlet } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -9,44 +9,57 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { BookOpen, FileText, LogOut, Menu, Users, Link2, MessageSquare } from "lucide-react"
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dropdown-menu";
+import {
+  BookOpen,
+  FileText,
+  LogOut,
+  Menu,
+  Users,
+  Link2,
+  MessageSquare,
+} from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { cn } from "@/lib/utils";
 // import { FreeTrialBanner } from "@/components/free-trial-banner"
-import { Logo } from "@/components/logo"
+import { Logo } from "@/components/logo";
+import { useAuth } from "@/context/AuthContext";
 
 export default function DashboardLayout() {
-  const [isMobile, setIsMobile] = useState(false)
-  const location = useLocation()
-  const pathname = location.pathname
-  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false)
-
+  const [isMobile, setIsMobile] = useState(false);
+  const location = useLocation();
+  const pathname = location.pathname;
+  const [isSidebarCollapsed, setSidebarCollapsed] = useState(false);  
+  const { logout } = useAuth();
+  const [userData, setUserData] = useState<{name?: string, role?: string, email?: string}>({});
+  
   useEffect(() => {
     const checkIsMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
+      setIsMobile(window.innerWidth < 768);
+    };
+    const authUser = JSON.parse(localStorage.getItem('auth_user') || '{}');
+    setUserData(authUser);
 
     // Initial check
-    checkIsMobile()
+    checkIsMobile();
 
     // Add event listener
-    window.addEventListener("resize", checkIsMobile)
+    window.addEventListener("resize", checkIsMobile);
 
     // Cleanup
-    return () => window.removeEventListener("resize", checkIsMobile)
-  }, [])
+    return () => window.removeEventListener("resize", checkIsMobile);
+  }, []);
 
   // Redirect from dashboard root to assignments
   useEffect(() => {
     if (pathname === "/dashboard") {
-      window.location.href = "/dashboard/assignments"
+      window.location.href = "/dashboard/assignments";
     }
-  }, [pathname])
+  }, [pathname]);
 
   const toggleSidebar = () => {
-    setSidebarCollapsed(!isSidebarCollapsed)
-  }
+    setSidebarCollapsed(!isSidebarCollapsed);
+  };
 
   const NavItems = () => (
     <>
@@ -54,12 +67,14 @@ export default function DashboardLayout() {
         variant="ghost"
         className={cn(
           "justify-start hover:bg-primary hover:text-white w-full",
-          isSidebarCollapsed && "justify-center px-2",
+          isSidebarCollapsed && "justify-center px-2"
         )}
         asChild
       >
         <Link to="/dashboard/courses">
-          <BookOpen className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")} />
+          <BookOpen
+            className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")}
+          />
           {!isSidebarCollapsed && <span>Courses</span>}
         </Link>
       </Button>
@@ -67,12 +82,14 @@ export default function DashboardLayout() {
         variant="ghost"
         className={cn(
           "justify-start hover:bg-primary hover:text-white w-full",
-          isSidebarCollapsed && "justify-center px-2",
+          isSidebarCollapsed && "justify-center px-2"
         )}
         asChild
       >
         <Link to="/dashboard/assignments">
-          <FileText className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")} />
+          <FileText
+            className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")}
+          />
           {!isSidebarCollapsed && <span>Assignments</span>}
         </Link>
       </Button>
@@ -80,12 +97,14 @@ export default function DashboardLayout() {
         variant="ghost"
         className={cn(
           "justify-start hover:bg-primary hover:text-white w-full",
-          isSidebarCollapsed && "justify-center px-2",
+          isSidebarCollapsed && "justify-center px-2"
         )}
         asChild
       >
         <Link to="/dashboard/classroompage">
-          <Users className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")} />
+          <Users
+            className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")}
+          />
           {!isSidebarCollapsed && <span>Classroom</span>}
         </Link>
       </Button>
@@ -93,12 +112,14 @@ export default function DashboardLayout() {
         variant="ghost"
         className={cn(
           "justify-start hover:bg-primary hover:text-white w-full",
-          isSidebarCollapsed && "justify-center px-2",
+          isSidebarCollapsed && "justify-center px-2"
         )}
         asChild
       >
         <Link to="/dashboard/integrations">
-          <Link2 className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")} />
+          <Link2
+            className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")}
+          />
           {!isSidebarCollapsed && <span>Integrations</span>}
         </Link>
       </Button>
@@ -107,21 +128,27 @@ export default function DashboardLayout() {
           variant="ghost"
           className={cn(
             "justify-start hover:bg-primary hover:text-white w-full",
-            isSidebarCollapsed && "justify-center px-2",
+            isSidebarCollapsed && "justify-center px-2"
           )}
           asChild
         >
-          <Link to="https://gradegenie.hipporello.net/desk" target="_blank" rel="noopener noreferrer">
-            <MessageSquare className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")} />
+          <Link
+            to="https://gradegenie.hipporello.net/desk"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <MessageSquare
+              className={cn("h-4 w-4", isSidebarCollapsed ? "mr-0" : "mr-2")}
+            />
             {!isSidebarCollapsed && <span>Feedback</span>}
           </Link>
         </Button>
       </div>
     </>
-  )
+  );
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col p-1">
       {/* <FreeTrialBanner daysRemaining={3} hoursRemaining={0} creditsRemaining={3} /> */}
       <header className="sticky top-0 z-50 w-full border-b bg-background">
         <div className="container flex h-14 items-center">
@@ -151,34 +178,47 @@ export default function DashboardLayout() {
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
             <Button variant="outline" size="sm" className="ml-auto h-8" asChild>
-              <Link to="https://gradegenie.hipporello.net/desk" target="_blank" rel="noopener noreferrer">
+              <Link
+                to="https://gradegenie.hipporello.net/desk"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
                 <MessageSquare className="mr-2 h-4 w-4" />
                 Feedback
               </Link>
             </Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                <Button
+                  variant="ghost"
+                  className="relative h-8 w-8 rounded-full"
+                >
                   <Avatar className="h-8 w-8">
                     <AvatarImage src="/placeholder.svg" alt="Professor" />
-                    <AvatarFallback className="bg-primary/10 text-primary">PF</AvatarFallback>
+                    <AvatarFallback className="bg-primary/10 text-primary">
+                      {userData.name?.[0] || 'U'}
+                    </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-sm">{userData.email}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link to="https://gradegenie.hipporello.net/desk" target="_blank" rel="noopener noreferrer">
+                  <Link
+                    to="https://gradegenie.hipporello.net/desk"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <MessageSquare className="mr-2 h-4 w-4" />
                     <span>Feedback</span>
                   </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem asChild>
-                  <Link to="/login">
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                  </Link>
+                    <Link to="/login" onClick={logout}>
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Log out</span>
+                    </Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -191,7 +231,7 @@ export default function DashboardLayout() {
           className={cn(
             "flex-col border-r bg-secondary transition-all duration-300 ease-in-out",
             isMobile ? "hidden" : "flex",
-            isSidebarCollapsed ? "w-[60px]" : "w-[240px]",
+            isSidebarCollapsed ? "w-[60px]" : "w-[240px]"
           )}
         >
           <div className="flex flex-col space-y-1 p-4 h-full relative">
@@ -239,5 +279,5 @@ export default function DashboardLayout() {
         </main>
       </div>
     </div>
-  )
+  );
 }

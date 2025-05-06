@@ -66,4 +66,8 @@ export const coursesApi = {
     });
     return response.data;
   },
+  getAssignments: async (courseId: string) => {
+    const response = await api.get(`${courseId}/assignments`);
+    return response.data;
+  },
 };

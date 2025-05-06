@@ -21,10 +21,10 @@ import {
 } from "@/components/ui/dialog";
 import { assignmentApi } from "@/services/api";
 import { jsPDF } from "jspdf";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Textarea } from "@/components/ui/textarea";
 import { ASSIGNMENT_TYPES } from "@/utils/constants";
-import { Assignment, Question } from "@/context/AssignmentContext";
+import { Question } from "@/utils/type";
+import { Assignment } from "@/utils/type";
+
 
 interface Answer {
   questionId: string;
@@ -38,6 +38,7 @@ export default function AssignmentDetails() {
   const [data, setData] = useState<Assignment | null>(null);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [showAnswersDialog, setShowAnswersDialog] = useState(false);
+const {role} = JSON.parse(localStorage.getItem('auth_user') || '{}');
 
   const fetchAssignment = useCallback(async () => {
     const { data } = await assignmentApi.getAssignmentById(id);
@@ -47,6 +48,7 @@ export default function AssignmentDetails() {
   useEffect(() => {
     fetchAssignment();
   }, [fetchAssignment]);
+
 
   const totalPoints = data?.questions?.reduce(
     (acc: number, question: Question) => acc + (question.points || 0),
@@ -64,12 +66,11 @@ export default function AssignmentDetails() {
   const fetchAnswers = useCallback(async () => {
     const { data } = await assignmentApi.getAssignmentAnswers(id);
     setAnswers(data?.answerKey || []);
+
     setShowAnswersDialog(true);
   }, [id]);
 
-  const handleUploadComplete = (files: File[], images: string[]) => {
-    console.log("Files uploaded:", files);
-    console.log("Images captured:", images);
+  const handleUploadComplete = () => {
     // Here you would typically process the files/images and send them to your backend
   };
 
@@ -107,7 +108,7 @@ export default function AssignmentDetails() {
       yPosition += 10;
 
       doc.setFontSize(12);
-      const questionLines = doc.splitTextToSize(question.questionText, 170);
+      const questionLines = doc.splitTextToSize(question.question, 170);
       doc.text(questionLines, 20, yPosition);
       yPosition += questionLines.length * 7 + 5;
 
@@ -165,14 +166,16 @@ export default function AssignmentDetails() {
             <Download className="h-4 w-4" />
             Download Assignment
           </Button>
-          <Button
-            variant="outline"
-            onClick={fetchAnswers}
-            className="flex items-center gap-2"
-          >
-            <Eye className="h-4 w-4" />
-            View Answers
-          </Button>
+          {(data?.type === ASSIGNMENT_TYPES.MULTIPLE_CHOICE || data?.type === ASSIGNMENT_TYPES.SHORT_ANSWER) && role !== "student" && (
+            <Button
+              variant="outline"
+              onClick={fetchAnswers}
+              className="flex items-center gap-2"
+            >
+              <Eye className="h-4 w-4" />
+              View Answers
+            </Button>
+          )}
         </div>
       </div>
 
@@ -198,9 +201,8 @@ export default function AssignmentDetails() {
         <CardHeader>
           <CardTitle>Points</CardTitle>
           <CardDescription>
-            {data?.questions?.reduce(
-              (acc: number, question: { points: number }) =>
-                acc + question.points,
+            {data?.questions?.reduce<number>(
+              (acc, question) => acc + (question.points || 0),
               0
             )}{" "}
             Points{" "}
@@ -209,74 +211,63 @@ export default function AssignmentDetails() {
         <CardContent>
           <div className="space-y-6">
             {data?.questions?.map(
-              (
-                question: {
-                  questionText: string;
-                  type: string;
-                  points: number;
-                  options: any[];
-                  _id: string;
-                },
-                index: number
-              ) => (
-                <div key={question._id} className="p-4 border rounded-lg">
+              (question: Question, index: number) => (
+                <div key={index} className="p-4 border rounded-lg">
                   <div className="flex justify-between items-start mb-2">
                     <h3 className="text-lg font-medium">
                       Question {index + 1}
                     </h3>
-                    <Badge variant="outline">{question.points} points</Badge>
+                    <Badge variant="outline">{question.points || question.marks} points</Badge>
                   </div>
                   <p className="text-muted-foreground mb-4">
-                    {question.questionText}
+                    {question.question}
                   </p>
 
+                  {/* {(() => { console.log(data,'question.type'); return null; })()} */}
                   {/* Multiple Choice Questions */}
-                  {question.type === ASSIGNMENT_TYPES.MULTIPLE_CHOICE &&
+                  {data.type === ASSIGNMENT_TYPES.MULTIPLE_CHOICE &&
                     question.options && (
                       <div className="space-y-2">
-                        {Object.entries(question.options).map(
-                          ([key, value]) => (
-                            <div
-                              key={key}
-                              className="flex items-center space-x-2"
+                        {Object.entries(question.options).map(([key, value]) => (
+                          <div
+                            key={key}
+                            className="flex items-center space-x-2"
+                          >
+                            {/* <Checkbox
+                              id={`question-${index}-option-${key}`}
+                            /> */}
+                            <label
+                              htmlFor={`question-${index}-option-${key}`}
+                              className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
                             >
-                              <Checkbox
-                                id={`question-${index}-option-${key}`}
-                              />
-                              <label
-                                htmlFor={`question-${index}-option-${key}`}
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                              >
-                                {String.fromCharCode(65 + parseInt(key))}){" "}
-                                {value}
-                              </label>
-                            </div>
-                          )
-                        )}
+                              {String.fromCharCode(65 + parseInt(key))}){" "}
+                              {value}
+                            </label>
+                          </div>
+                        ))}
                       </div>
                     )}
 
                   {question.type === ASSIGNMENT_TYPES.SHORT_ANSWER && (
-                    <Textarea
-                      placeholder="Enter your answer here..."
-                      className="min-h-[100px]"
-                    />
+                    // <Textarea
+                    //   placeholder="Enter your answer here..."
+                    //   className="min-h-[100px]"
+                    // />
+                    <></>
                   )}
-                  {(() => {
-                    console.log(question.type, ASSIGNMENT_TYPES.SHORT_ANSWER);
-                    return null;
-                  })()}
+  
 
                   {/* Essay Questions */}
                   {question.type === ASSIGNMENT_TYPES.ESSAY && (
-                    <Textarea
-                      placeholder="Enter your essay here..."
-                      className="min-h-[200px]"
-                    />
+                    // <Textarea
+                    //   placeholder="Enter your essay here..."
+                    //   className="min-h-[200px]"
+                    // />
+                    <></>
                   )}
 
                   <Badge className="mt-4">
-                    {question.type
+                    {data?.type
                       .split("_")
                       .map(
                         (word) => word.charAt(0).toUpperCase() + word.slice(1)

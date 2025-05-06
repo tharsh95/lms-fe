@@ -1,14 +1,33 @@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { useEffect } from "react";
 
 interface SyllabusPreviewProps {
-  syllabusData: any,
-
+  syllabusData: {
+    courseTitle: string;
+    term: string;
+    instructor: string;
+    courseDescription: string;
+    learningObjectives: string[];
+    requiredMaterials: Array<{
+      title: string;
+      author: string;
+      publisher: string;
+      year: string;
+      required: boolean;
+    }>;
+    gradingPolicy: Record<string, { description: string; percentage: number }>;
+    weeklySchedule: Array<{
+      week: string;
+      topic: string;
+      readings: string;
+      assignments: string;
+    }>;
+    policies: Record<string, string>;
+  };
 }
 
 export function SyllabusPreview({ syllabusData }: SyllabusPreviewProps) {
   // Calculate total percentage for grading policy
-  console.log(syllabusData, "SYLLABUS DATA"); 
+
   const totalPercentage = Object.values(syllabusData.gradingPolicy).reduce(
     (sum: number, item: any) => sum + item.percentage,
     0,
@@ -117,7 +136,7 @@ export function SyllabusPreview({ syllabusData }: SyllabusPreviewProps) {
 
       <section>
         <h2 className="text-2xl font-semibold border-b pb-2 mb-4">Course Policies</h2>
-        {Object.entries(syllabusData.policies).map(([key, value]: [string, string]) => (
+        {Object.entries(syllabusData.policies).map(([key, value]) => (
           <div key={key} className="mb-4">
             <h3 className="text-lg font-medium mb-2">
               {key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, " $1")}

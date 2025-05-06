@@ -1,15 +1,16 @@
 export interface GeneratedContent {
 
     instructions?: string | {
-        sections: Array<{
-            title: string;
-            content: string;
-        }>;
-    };
+        _id: string;
+        title: string;
+        content: string;
+
+    }[];
     rubric?: string | Array<{
-        criterion: string;
-        points: number;
-        description: string;
+        _id: string;
+        Criterion: string;
+        Points: number;
+        Description: string;
     }>;
     questions?: string | Question[];
     answerKey?: AnswerKeyItem[];
@@ -17,7 +18,7 @@ export interface GeneratedContent {
         item: string;
         required: boolean;
     }>;
-    participation_criteria?: string;
+    participationCriteria?: string;
     peer_evaluation?: string;
     // Additional properties from API response
     title?: string;
@@ -28,18 +29,34 @@ export interface GeneratedContent {
     difficultyLevel?: string;
 }
 export interface Question {
-    questionText: string;
+    _id: string;
+    question: string;
     type: string;
     points: number;
     options?: Record<string, string>;
+    correctAnswer?: string;
+    marks?: number;
 }
 
 export interface AnswerKeyItem {
+
     questionId: string;
     key: string;
     value: string;
+    options?: string[];
 }
 
 export interface ShortAnswer {
     key: string;
+}
+export interface Assignment {
+    id: string;
+    title: string;
+    description: string;
+    type: string;
+    dueDate: string;
+    totalMarks: number;
+    questions: Question[];
+    createdAt: string;
+    updatedAt: string;
 }

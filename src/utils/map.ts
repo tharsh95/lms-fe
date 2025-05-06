@@ -1,5 +1,4 @@
 export const mapSyllabus = (syllabus: any) => {
-  console.log(syllabus, "SYLLABUS");
   const syllabusData = {
     courseTitle: syllabus?.courseName,
     instructor: syllabus?.parsedSyllabus.instructor.name,

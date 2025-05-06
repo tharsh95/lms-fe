@@ -603,7 +603,6 @@ const EditSyllabus: React.FC = () => {
                     variant="default"
                     onClick={async () => {
                       const course = mapCourse(syllabusData, courseData);
-                      console.log(course, "course");
                       await coursesApi.updateCourse(course);
                       navigate(`/dashboard/courses/${courseData._id}`);
                     }}

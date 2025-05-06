@@ -8,8 +8,21 @@ import { useEffect, useState } from "react"
 import { coursesApi } from "@/services/courses"
 import { includeSuffix } from "@/utils/map"
 
+interface Course {
+  id: string;
+  _id: string;
+  courseName: string;
+  subject: string;
+  grade: number;
+  description: string;
+  enrollment: {
+    totalStudents: number;
+      totalAssignments: number;
+  };
+}
+
 export default function CoursesPage() {
-  const [courses, setCourses] = useState<any>([]);
+  const [courses, setCourses] = useState<Course[]>([]);
   const fetchCourses = async () => {
     const { data } = await coursesApi.getAllCourses();
     setCourses(data);
@@ -17,32 +30,7 @@ export default function CoursesPage() {
   useEffect(() => {
     fetchCourses();
   }, []);
-  // const courses = [
-  //   {
-  //     id: "1",
-  //     name: "Introduction to Literature",
-  //     description: "A survey of major literary works from various periods and cultures.",
-  //     subject: "English",
-  //     students: 28,
-  //     assignments: 12,
-  //   },
-  //   {
-  //     id: "2",
-  //     name: "Algebra II",
-  //     description: "Advanced algebraic concepts including functions, equations, and graphs.",
-  //     subject: "Mathematics",
-  //     students: 32,
-  //     assignments: 15,
-  //   },
-  //   {
-  //     id: "3",
-  //     name: "World History",
-  //     description: "Exploration of major historical events and their impact on modern society.",
-  //     subject: "History",
-  //     students: 25,
-  //     assignments: 8,
-  //   },
-  // ]
+
 
   return (
     <div className="container mx-auto p-6">
@@ -58,7 +46,7 @@ export default function CoursesPage() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {courses.map((course) => (
-          <Card key={course.id}>
+          <Card key={course._id}>
             <CardHeader>
               <CardTitle>{course.courseName}</CardTitle>
               <CardDescription>{course.subject}-{includeSuffix(course.grade)} Grade</CardDescription>
@@ -70,7 +58,7 @@ export default function CoursesPage() {
                   <span className="font-medium">{course.enrollment.totalStudents}</span> Students
                 </div>
                 <div>
-                  <span className="font-medium">{course.assignments}</span> Assignments
+                  <span className="font-medium">{course.enrollment.totalAssignments}</span> Assignments
                 </div>
               </div>
             </CardContent>

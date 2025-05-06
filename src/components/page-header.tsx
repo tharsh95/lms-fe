@@ -1,5 +1,3 @@
-import type * as React from "react"
-
 interface PageHeaderProps {
   heading: string;
   subheading?: string;

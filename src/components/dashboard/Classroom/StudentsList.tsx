@@ -1,8 +1,8 @@
-import { useState } from "react"
-import { MoreHorizontal, Search } from "lucide-react"
+import { useState } from "react";
+import { MoreHorizontal, Search } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
-import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,14 +10,25 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
+} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export interface Student {
-  
   _id: string;
   name: string;
   email: string;
@@ -32,13 +43,16 @@ export interface Student {
 }
 
 export function StudentsList({ students }: { students: Student[] }) {
-  const [searchQuery, setSearchQuery] = useState("")
+
+  const [searchQuery, setSearchQuery] = useState("");
   const filteredStudents = students.filter(
     (student) =>
       student.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       student.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.classes.some(c => c.name.toLowerCase().includes(searchQuery.toLowerCase()))
-  )
+      student.classes.some((c) =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+  );
 
   return (
     <div className="space-y-4">
@@ -59,8 +73,12 @@ export function StudentsList({ students }: { students: Student[] }) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Classes</SelectItem>
-            {Array.from(new Set(students.flatMap(s => s.classes.map(c => c.name)))).map(className => (
-              <SelectItem key={className} value={className}>{className}</SelectItem>
+            {Array.from(
+              new Set(students.flatMap((s) => s.classes.map((c) => c.name)))
+            ).map((className) => (
+              <SelectItem key={className} value={className}>
+                {className}
+              </SelectItem>
             ))}
           </SelectContent>
         </Select>
@@ -89,18 +107,22 @@ export function StudentsList({ students }: { students: Student[] }) {
                 <TableCell className="font-medium">{student.name}</TableCell>
                 <TableCell>{student.email}</TableCell>
                 <TableCell>
-              <div className="flex flex-wrap gap-2">
-                {student.classes.map((cls) => (
-                  <span
-                    key={cls.classId}
-                    className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
-                  >
-                    {cls.name} ({cls.grade}-{cls.section})
-                  </span>
-                ))}
-              </div>
-            </TableCell>
-            <TableCell>{student.classes[0].academicYear}</TableCell>
+                  <div className="flex flex-wrap gap-2">
+                    {student.classes.map((cls) => (
+                      <span
+                        key={cls.classId}
+                        className="inline-flex items-center rounded-md bg-primary/10 px-2 py-1 text-xs font-medium text-primary"
+                      >
+                        {cls.name} ({cls.grade}-{cls.section})
+                      </span>
+                    ))}
+                  </div>
+                </TableCell>
+                {student.classes.length > 0 ? (
+                  <TableCell>{student?.classes[0].academicYear}</TableCell>
+                ) : (
+                  <TableCell>N/A</TableCell>
+                )}
                 <TableCell>
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -115,7 +137,9 @@ export function StudentsList({ students }: { students: Student[] }) {
                       <DropdownMenuItem>View Submissions</DropdownMenuItem>
                       <DropdownMenuSeparator />
                       <DropdownMenuItem>Edit</DropdownMenuItem>
-                      <DropdownMenuItem className="text-destructive">Remove</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive">
+                        Remove
+                      </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -125,5 +149,5 @@ export function StudentsList({ students }: { students: Student[] }) {
         </Table>
       </div>
     </div>
-  )
+  );
 }

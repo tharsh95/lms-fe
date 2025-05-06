@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { assignmentApi } from "@/services/api";
+import { includeSuffix } from "@/utils/map";
 
 // Define the Assignment type
 interface Assignment {
@@ -29,6 +30,12 @@ interface Assignment {
   submissionsCount: number;
   createdAt: string;
   questions: [];
+  type: string;
+  course: {
+    subject: string;
+    courseName: string;
+  };
+  grade: number;
 }
 
 export default function AssignmentsPage() {
@@ -36,8 +43,8 @@ export default function AssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const location = useLocation();
-  console.log(location.pathname, "Assignments");
+
+
   // Fetch assignments when component mounts
   useEffect(() => {
     fetchAssignments();
@@ -120,11 +127,21 @@ export default function AssignmentsPage() {
                   <CardTitle>{assignment.title}</CardTitle>
                   <CardDescription>{assignment.topic}</CardDescription>
                   <CardDescription>{assignment.questions.length} questions</CardDescription>
+                  <CardDescription>{assignment.course.subject}</CardDescription>
+                  <CardDescription>{assignment.course.courseName}</CardDescription>
                 </div>
+                <div className="flex flex-col  space-y-2">
+                <Badge>
+                  {includeSuffix(assignment.grade)}
+                </Badge>
+                <Badge>
+                  {(assignment?.type[0]?.toUpperCase() + assignment.type.slice(1)).split("_")[0]}
+                </Badge>
                 <Badge variant={getBadgeVariant(assignment.status)}>
                   {assignment?.status?.charAt(0)?.toUpperCase() +
                     assignment?.status?.slice(1)}
                 </Badge>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="text-sm text-muted-foreground">

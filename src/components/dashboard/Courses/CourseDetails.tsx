@@ -23,7 +23,7 @@ import {
   Download,
   FileText,
   GraduationCap,
-  Loader2,
+
   Plus,
   Save,
   Users,
@@ -44,6 +44,48 @@ import { Label } from "@/components/ui/label";
 import { coursesApi } from "@/services/courses";
 import { SyllabusPreview } from "./SyllabusPreview";
 import { includeSuffix, mapSyllabus } from "@/utils/map";
+
+interface Course {
+  courseName: string;
+  subject: string;
+  grade: number;
+  assignments: Array<{
+    id: string;
+    title: string;
+    description: string;
+    dueDate: string;
+    status: string;
+    questions: Array<{
+      id: string;
+      question: string;
+      options: Array<{
+        id: string;
+        option: string;
+      }>;
+    }>;
+  }>;
+  enrollment: {
+    totalStudents: number;
+    classes: Array<{
+      students: Array<{
+        name: string;
+        email: string;
+      }>;
+    }>;
+  };
+  parsedSyllabus?: {
+    term: string;
+    gradingReferences: Array<{
+      id: string;
+      title: string;
+      type: string;
+      added: string;
+      usedIn: string;
+      url?: string;
+    }>;
+  };
+}
+
 export default function CourseDetailPage() {
   const params = useParams();
   const { id } = params;
@@ -51,12 +93,11 @@ export default function CourseDetailPage() {
 
 
   const [activeTab, setActiveTab] = useState("assignments");
-  const [isDownloadingSyllabus, setIsDownloadingSyllabus] = useState(false);
-  const [isSyncing, setIsSyncing] = useState(false);
-  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+
+
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
-  const [course, setCourse] = useState<any>(null);
+
+  const [course, setCourse] = useState<Course | null>(null);
 
   const fetchCourse = async () => {
     try {
@@ -72,18 +113,13 @@ export default function CourseDetailPage() {
     fetchCourse();
   }, [id]);
 
-  const handleGradeAssignment = (assignmentId: string) => {
-    // In a real app, this would navigate to the grading page for this assignment
-    window.location.href = `/dashboard/assignments/${assignmentId}`;
-  };
+ 
 
   const handleEmailStudents = () => {
-    setIsEmailModalOpen(true);
+
   };
 
-  const handleSendEmail = () => {
-    setIsEmailModalOpen(false);
-  };
+ 
 
   const handleDownloadRoster = () => {};
 
@@ -201,18 +237,17 @@ export default function CourseDetailPage() {
     doc.save(`${syllabusData.courseTitle || "syllabus"}.pdf`);
   };
 
-  const handleSyncWithLMS = (lms: string) => {
-    setIsSyncing(true);
-    console.log(lms);
-    // Simulate syncing with LMS
-    setTimeout(() => {
-      setIsSyncing(false);
-    }, 2000);
-  };
+  // const handleSyncWithLMS = () => {
+  //   setIsSyncing(true);
+  //   // Simulate syncing with LMS
+  //   setTimeout(() => {
+  //     setIsSyncing(false);
+  //   }, 2000);
+  // };
 
-  const handleUploadReference = () => {
-    setIsUploadModalOpen(true);
-  };
+  // const handleUploadReference = () => {
+  //   setIsUploadModalOpen(true);
+  // };
 
   const handleAddLink = () => {
     setIsLinkModalOpen(true);
@@ -220,10 +255,6 @@ export default function CourseDetailPage() {
 
   const handleLinkSubmit = () => {
     setIsLinkModalOpen(false);
-  };
-
-  const handleUploadSubmit = () => {
-    setIsUploadModalOpen(false);
   };
 
   return (
@@ -235,7 +266,7 @@ export default function CourseDetailPage() {
           </Link>
         </Button>
         <h2 className="text-3xl font-bold tracking-tight">{course?.courseName}</h2>
-        <Badge className="text-sm">{course?.subject}-{includeSuffix(course?.grade)} Class</Badge>
+        <Badge className="text-sm">{course?.subject}-{course?.grade ? includeSuffix(course.grade) : ''} Class</Badge>
       </div>
       <div className="grid gap-4 md:grid-cols-7">
         <Card className="md:col-span-5">
@@ -257,7 +288,7 @@ export default function CourseDetailPage() {
           </CardHeader>
           <CardContent>
             <Tabs
-              defaultValue="assignments"
+              defaultValue={activeTab}
               className="space-y-4"
               onValueChange={setActiveTab}
             >
@@ -267,6 +298,44 @@ export default function CourseDetailPage() {
                 <TabsTrigger value="syllabus">Syllabus</TabsTrigger>
                 <TabsTrigger value="references">Grading References</TabsTrigger>
               </TabsList>
+              <TabsContent value="assignments" className="space-y-4">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Assignments</CardTitle>
+                    <CardDescription>
+                      {course?.assignments?.length} assignments in this course
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Title</TableHead>
+                          <TableHead>Description</TableHead>
+                          <TableHead>Due Date</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Actions</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {course?.assignments?.map((assignment: any) => (
+                          <TableRow key={assignment.id}>
+                            <TableCell>{assignment.title}</TableCell>
+                            <TableCell>{assignment.description}</TableCell>
+                            <TableCell>{assignment.dueDate}</TableCell>
+                            <TableCell>{assignment.status}</TableCell>
+                            <TableCell>
+                              <Button variant="ghost" size="sm">
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </CardContent>
+                </Card>
+              </TabsContent>
              
               <TabsContent value="students" className="space-y-4">
                 <Card>
@@ -338,19 +407,19 @@ export default function CourseDetailPage() {
                         <Button
                           variant="outline"
                           onClick={handleDownloadPDF}
-                          disabled={isDownloadingSyllabus}
+                          // disabled={isDownloadingSyllabus}
                         >
-                          {isDownloadingSyllabus ? (
+                          {/* {isDownloadingSyllabus ? (
                             <>
                               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                               Downloading...
                             </>
-                          ) : (
+                          ) : ( */}
                             <>
                               <Download className="mr-2 h-4 w-4" />
                               Download PDF
                             </>
-                          )}
+                          {/* )} */}
                         </Button>
                         <Button onClick={() => navigate('/dashboard/edit-syllabus',{state:{course}})}>
                             <Save className="mr-2 h-4 w-4" />
@@ -383,7 +452,8 @@ export default function CourseDetailPage() {
                           <Link2 className="mr-2 h-4 w-4" />
                           Add Link
                         </Button>
-                        <Button onClick={handleUploadReference}>
+                        <Button onClick={()=>{}}>
+                        {/* <Button onClick={handleUploadReference}> */}
                           <Plus className="mr-2 h-4 w-4" />
                           Upload Reference
                         </Button>
@@ -412,7 +482,8 @@ export default function CourseDetailPage() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {course?.parsedSyllabus?.gradingReferences.map((reference: any) => (
+                            {course?.parsedSyllabus?.gradingReferences && course.parsedSyllabus.gradingReferences.length > 0 && (
+                            course.parsedSyllabus.gradingReferences.map((reference: any) => (
                               <TableRow key={reference.id}>
                                 <TableCell className="font-medium">
                                   {reference.title}
@@ -438,7 +509,7 @@ export default function CourseDetailPage() {
                                   </Button>
                                 </TableCell>
                               </TableRow>
-                            ))}
+                            )))}
                           </TableBody>
                         </Table>
                       </TabsContent>
@@ -551,11 +622,11 @@ export default function CourseDetailPage() {
                           <div className="flex items-center space-x-2">
                             {lms.connected ? (
                               <>
-                                <Button
+                                {/* <Button
                                   variant="outline"
                                   size="sm"
                                   className="h-8"
-                                  onClick={() => handleSyncWithLMS(lms.name)}
+                                  // onClick={() => handleSyncWithLMS(lms.name)}
                                   disabled={isSyncing}
                                 >
                                   {isSyncing ? (
@@ -569,7 +640,7 @@ export default function CourseDetailPage() {
                                       Sync Now
                                     </>
                                   )}
-                                </Button>
+                                </Button> */}
                                 <Button
                                   variant="outline"
                                   size="sm"
@@ -636,20 +707,8 @@ export default function CourseDetailPage() {
               <Users className="mr-2 h-4 w-4" />
               Email Students
             </Button>
-            <Button
-              className="w-full justify-start"
-              variant="outline"
-              onClick={handleDownloadRoster}
-            >
-              <Download className="mr-2 h-4 w-4" />
-              Download Roster
-            </Button>
-            <Button className="w-full justify-start" variant="outline" asChild>
-              <Link to="/dashboard/integrations">
-                <Link2 className="mr-2 h-4 w-4" />
-                Manage Integrations
-              </Link>
-            </Button>
+          
+          
           </CardContent>
         </Card>
       </div>
