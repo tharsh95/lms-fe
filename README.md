@@ -28,7 +28,7 @@ A modern educational content management system built with React, TypeScript, and
 ## 🚀 Getting Started
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/tharsh95/lms-be.git
+   git clone https://github.com/tharsh95/lms-fe.git
 
    ```
 1. **Install Dependencies**
