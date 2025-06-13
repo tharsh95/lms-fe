@@ -49,8 +49,9 @@ export const mapCourse = (syllabus: any, course: any) => {
 }
 
 export const includeSuffix = (grade: number) => {
-  if (grade === 1) return `${grade}st`;
-  if (grade === 2) return `${grade}nd`;
-  if (grade === 3) return `${grade}rd`;
+  console.log(typeof grade,"gra")
+  if (grade == 1) return `${grade}st`;
+  if (grade == 2) return `${grade}nd`;
+  if (grade == 3) return `${grade}rd`;
   return `${grade}th`;
 }

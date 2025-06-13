@@ -313,6 +313,23 @@ export default function EditAssignment() {
       </div>
     );
   }
+  const getDialogTitle = (type: string) => {
+    switch (type) {
+      case "discussion":
+        return "Discussion Topic";
+      case "multiple_choice_quiz":
+        return "Multiple Choice Question";
+      case "short_answer_test":
+        return "Short Answer Question";
+      case "essay":
+        return "Essay Question";
+      case "case_study":
+        return "Case Study Question";
+      default:
+        return "Question";
+    }
+  };
+
   const renderQuestionForm = () => {
     return (
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -325,18 +342,7 @@ export default function EditAssignment() {
         <DialogContent className="sm:max-w-[600px]">
           <DialogHeader>
             <DialogTitle>
-              Add{" "}
-              {assignment?.type === "discussion"
-                ? "Discussion Topic"
-                : assignment?.type === "multiple_choice_quiz"
-                ? "Multiple Choice Question"
-                : assignment?.type === "short_answer_test"
-                ? "Short Answer Question"
-                : assignment?.type === "essay"
-                ? "Essay Question"
-                : assignment?.type === "case_study"
-                ? "Case Study Question"
-                : "Question"}
+              Add {getDialogTitle(assignment?.type || "")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-4">

@@ -85,6 +85,15 @@ export default function AssignmentsPage() {
     }
   };
 
+  const getDateDisplay = (assignment: Assignment) => {
+    const prefix = assignment.status === "active" ? "Due: " : "Created: ";
+    return prefix + new Date(assignment.createdAt).toLocaleDateString();
+  };
+
+  const getButtonText = (status: string) => {
+    return status === "draft" ? "Edit Draft" : "View Details";
+  };
+
   return (
     <div className="flex-1 space-y-4 p-4 md:p-8 pt-6">
       <div className="flex items-center justify-between space-y-2">
@@ -147,10 +156,7 @@ export default function AssignmentsPage() {
                 <div className="text-sm text-muted-foreground">
                   <div className="flex items-center">
                     <CalendarDays className="mr-1 h-4 w-4" />
-                    <span>
-                      {assignment.status === "active" ? "Due: " : "Created: "}
-                      {new Date(assignment.createdAt).toLocaleDateString()}
-                    </span>
+                    <span>{getDateDisplay(assignment)}</span>
                   </div>
                 </div>  
               </CardContent>
@@ -160,9 +166,7 @@ export default function AssignmentsPage() {
                   className="w-full"
                 >
                   <Button variant="outline" className="w-full">
-                    {assignment.status === "draft"
-                      ? "Edit Draft"
-                      : "View Details"}
+                    {getButtonText(assignment.status)}
                   </Button>
                 </Link>
               </CardFooter>
