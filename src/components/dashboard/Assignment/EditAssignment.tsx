@@ -108,54 +108,64 @@ export default function EditAssignment() {
   );
   const [newQuestion, setNewQuestion] = useState({
     _id: "",
-    question: "Which sentence is in the present perfect tense?",
+    question: "",
     type: assignment?.type,
     points: 5,
     options: [
-      "a. She will have finished the project by tomorrow.",
-      "b. I have eaten the pizza.",
-      "c. He will be eating the pizza tomorrow.",
-      "d. She has finished the project.",
+      "",
+      "","",""
     ],
     answer: "",
   });
   const handleAddQuestion = async () => {
-    const options: Record<string, string> = {};
+    // Format options as a Record<string, string> for local state
+    const formattedOptions: Record<string, string> = {};
     newQuestion.options.forEach((option, i) => {
       const key = String.fromCharCode(97 + i);
-      options[key] = option;
+      formattedOptions[key] = option;
     });
+
+    // Create the question with formatted options for local state
+    const questionWithId = {
+      _id: `temp_${Date.now()}_${Math.random()}`,
+      question: newQuestion.question,
+      type: newQuestion.type,
+      points: newQuestion.points,
+      options: formattedOptions,
+      correctAnswer: newQuestion.answer
+    };
+
+    // Update local state
     setQuestions([
       ...questions,
-      {
-        ...newQuestion,
-        options,
-      },
+      questionWithId as LocalQuestion,
     ]);
-    const questionWithId = {
-      ...newQuestion,
-      options,
-      answer: newQuestion.answer,
-      _id: `temp_${Date.now()}_${Math.random()}`,
-    };
+
     setAssignment((prev) => ({
       ...prev,
       questions: [...prev.questions, questionWithId],
-
     }));
 
-    newQuestion.type = assignment?.type;
-    await assignmentApi.createResource(newQuestion, assignment?._id);
+    // Save to API with options as array of strings
+    await assignmentApi.createResource({
+      _id: questionWithId._id,
+      question: questionWithId.question,
+      type: questionWithId.type || "multiple_choice_quiz", // Ensure type is set
+      points: questionWithId.points,
+      options: Object.values(formattedOptions), // Convert to array of strings
+      answer: newQuestion.answer
+    }, assignment?._id);
+
+    // Reset form
     setNewQuestion({
       _id: "",
       question: "",
       type: assignment.type,
       points: 5,
-      options: [],
+      options: ["", "", "", ""],
       answer: "",
     });
     setIsModalOpen(false);
-    // getEditAssignment();
   };
   const handleAddInstruction = async () => {
     await assignmentApi.addInstruction(newInstruction, assignment?._id);
@@ -348,21 +358,21 @@ export default function EditAssignment() {
               <div className="space-y-2">
                 {newQuestion.options.map((option, index) => (
                   <div key={index} className="flex items-center space-x-2">
-                    <span className="font-medium"></span>
+                    <div className="w-8 font-medium">
+                      {String.fromCharCode(97 + index)}.
+                    </div>
                     <input
                       type="text"
                       placeholder={`Option ${index + 1}`}
                       value={option}
-                      onChange={(e) =>
-                      setAssignment((prev) => ({
-                        ...prev,
-                        questions: prev.questions.map((question) =>
-                          question._id === newQuestion._id
-                            ? { ...question, options: { ...question.options, [String.fromCharCode(97 + index)]: e.target.value } }
-                            : question
-                        )
-                      }))
-                      }
+                      onChange={(e) => {
+                        const newOptions = [...newQuestion.options];
+                        newOptions[index] = e.target.value;
+                        setNewQuestion(prev => ({
+                          ...prev,
+                          options: newOptions
+                        }));
+                      }}
                       className="flex-1 p-2 border rounded"
                     />
                   </div>
@@ -379,8 +389,11 @@ export default function EditAssignment() {
                     </SelectTrigger>
                     <SelectContent>
                       {newQuestion.options.map((option, index) => (
-                        <SelectItem key={index} value={option}>
-                          {option}
+                        <SelectItem 
+                          key={index} 
+                          value={option || `option_${index + 1}`}
+                        >
+                          {option || `Option ${index + 1}`}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -764,22 +777,21 @@ export default function EditAssignment() {
                         Question {index + 1} ({question.points} points)
                       </h4>
                       <p className="mt-2">{question.question}</p>
-                      {Array.isArray(question.options) &&
-                        question.options.length > 0 && (
-                          <div className="mt-2 space-y-1">
-                            {question.options.map((option, i) => (
-                              <div
-                                key={i}
-                                className="flex items-center space-x-2"
-                              >
-                                <span className="font-medium">
-                                  {String.fromCharCode(97 + i)}.
-                                </span>
-                                <span>{option}</span>
-                              </div>
-                            ))}
-                          </div>
-                        )}
+                      {question.options && (
+                        <div className="mt-2 space-y-1">
+                          {Object.entries(question.options).map(([key, value]) => (
+                            <div
+                              key={key}
+                              className="flex items-center space-x-2"
+                            >
+                              <span className="font-medium">
+                                {key.toUpperCase()}.
+                              </span>
+                              <span>{value}</span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
                     <Button
                       variant="ghost"

@@ -144,7 +144,9 @@ export function SyllabusCreator({
     try {
       setIsCreating(true);
       const course = mapSyllabus(courseData);
+      console.log(course,"cc")
       await coursesApi.createCourse({
+        id:course.id,
         title: course.courseTitle,
         description: course.courseDescription,
         topic: courseDetails.subject,

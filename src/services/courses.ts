@@ -67,7 +67,7 @@ export const coursesApi = {
     const response = await api.get('/courses');
     return response.data;
   },
-  createCourse: async (course: { title: string; description: string; topic: string; level: string }) => {
+  createCourse: async (course: {id:string, title: string; description: string; topic: string; level: string }) => {
     const response = await api.post('courses/', course, {
       headers: {
         'Content-Type': 'application/json',
